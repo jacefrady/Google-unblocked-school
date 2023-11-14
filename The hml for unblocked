@@ -1,73 +1,90 @@
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
 
-// Player
-const player = {
-    x: canvas.width / 2,
-    y: canvas.height - 30,
-    width: 30,
-    height: 30,
-    color: 'blue',
-    speed: 5,
-};
 
-// Bullets
-const bullets = [];
-const bulletSpeed = 8;
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Shooter Game</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.js"></script>
+    <style>
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
 
-function drawPlayer() {
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-}
+<script>
+    const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 600,
+        physics: {
+            default: 'arcade',
+            arcade: {
+                gravity: { y: 0 },
+                enableBody: true,
+            }
+        },
+        scene: {
+            preload: preload,
+            create: create,
+            update: update
+        }
+    };
 
-function drawBullets() {
-    ctx.fillStyle = 'red';
-    for (const bullet of bullets) {
-        ctx.fillRect(bullet.x, bullet.y, 5, 10);
+    const game = new Phaser.Game(config);
+
+    function preload() {
+        this.load.image('ship', 'path/to/your/ship/image.png');
+        this.load.image('bullet', 'path/to/your/bullet/image.png');
     }
-}
 
-function moveBullets() {
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        bullets[i].y -= bulletSpeed;
+    function create() {
+        // Create the player ship
+        player = this.physics.add.sprite(400, 500, 'ship');
+        player.setCollideWorldBounds(true);
 
-        // Remove bullets when they go off-screen
-        if (bullets[i].y < 0) {
-            bullets.splice(i, 1);
+        // Create bullets group
+        bullets = this.physics.add.group({
+            defaultKey: 'bullet',
+            maxSize: 10
+        });
+
+        // Set up keyboard input
+        cursors = this.input.keyboard.createCursorKeys();
+        fireKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    }
+
+    function update() {
+        // Move the player ship
+        if (cursors.left.isDown) {
+            player.setVelocityX(-200);
+        } else if (cursors.right.isDown) {
+            player.setVelocityX(200);
+        } else {
+            player.setVelocityX(0);
+        }
+
+        // Shoot bullets
+        if (fireKey.isDown) {
+            fireBullet();
         }
     }
-}
 
-function shoot() {
-    bullets.push({
-        x: player.x + player.width / 2 - 2.5,
-        y: player.y,
-    });
-}
-
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawPlayer();
-    drawBullets();
-    moveBullets();
-
-    requestAnimationFrame(gameLoop);
-}
-
-// Controls
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft' && player.x > 0) {
-        player.x -= player.speed;
-    } else if (event.key === 'ArrowRight' && player.x < canvas.width - player.width) {
-        player.x += player.speed;
-    } else if (event.key === ' ' || event.key === 'Spacebar') {
-        shoot();
+    function fireBullet() {
+        let bullet = bullets.get(player.x, player.y);
+        if (bullet) {
+            bullet.setActive(true);
+            bullet.setVisible(true);
+            bullet.setVelocityY(-400);
+        }
     }
-});
+</script>
 
-gameLoop();
-
+</body>
+</html>
 
 
 
