@@ -1,55 +1,98 @@
+import pygame
+import sys
+import random
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shooter Game</title>
-  <style>
-    canvas {
-      border: 1px solid #000;
-      display: block;
-      margin: 20px auto;
-    }
-  </style>
-</head>
-<body>
-  <canvas id="gameCanvas" width="800" height="600"></canvas>
-  <script>
-    // Your JavaScript code for the game goes here
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
+# Initialize Pygame
+pygame.init()
 
-    // Example: Draw a player
-    const player = {
-      x: 50,
-      y: 50,
-      width: 30,
-      height: 30,
-      color: 'blue',
-      draw: function() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-      }
-    };
+# Constants
+WIDTH, HEIGHT = 800, 600
+FPS = 60
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 
-    // Example: Game loop
-    function gameLoop() {
-      // Clear the canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+# Player
+player_size = 50
+player_speed = 5
+player = pygame.Rect(WIDTH // 2 - player_size // 2, HEIGHT - player_size - 10, player_size, player_size)
 
-      // Update and draw game elements
-      player.draw();
+# Bullets
+bullet_speed = 7
+bullets = []
 
-      // Request the next frame
-      requestAnimationFrame(gameLoop);
-    }
+# Enemies
+enemy_size = 50
+enemy_speed = 3
+enemies = []
 
-    // Start the game loop
-    gameLoop();
-  </script>
-</body>
-</html>
+# Create the game window
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Shooter Game")
+
+# Clock to control the frame rate
+clock = pygame.time.Clock()
+
+# Function to draw the player, bullets, and enemies
+def draw_elements():
+    screen.fill(WHITE)
+    pygame.draw.rect(screen, RED, player)
+    for bullet in bullets:
+        pygame.draw.rect(screen, WHITE, bullet)
+    for enemy in enemies:
+        pygame.draw.rect(screen, RED, enemy)
+
+# Main game loop
+while True:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    # Move the player
+    keys = pygame.key.get_pressed()
+    if keys[pygame.K_LEFT] and player.x > 0:
+        player.x -= player_speed
+    if keys[pygame.K_RIGHT] and player.x < WIDTH - player_size:
+        player.x += player_speed
+
+    # Shoot bullets
+    if keys[pygame.K_SPACE]:
+        bullet = pygame.Rect(player.x + player_size // 2 - 2, player.y, 4, 10)
+        bullets.append(bullet)
+
+    # Move bullets
+    for bullet in bullets:
+        bullet.y -= bullet_speed
+        if bullet.y < 0:
+            bullets.remove(bullet)
+
+    # Spawn enemies
+    if random.randint(1, 75) == 1:
+        enemy = pygame.Rect(random.randint(0, WIDTH - enemy_size), 0, enemy_size, enemy_size)
+        enemies.append(enemy)
+
+    # Move enemies
+    for enemy in enemies:
+        enemy.y += enemy_speed
+        if enemy.y > HEIGHT:
+            enemies.remove(enemy)
+
+    # Collision detection
+    for bullet in bullets:
+        for enemy in enemies:
+            if bullet.colliderect(enemy):
+                bullets.remove(bullet)
+                enemies.remove(enemy)
+
+    # Draw elements
+    draw_elements()
+
+    # Update the display
+    pygame.display.flip()
+
+    # Control the frame rate
+    clock.tick(FPS)
+
 
 
 
