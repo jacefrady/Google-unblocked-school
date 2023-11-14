@@ -3,86 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simple Shooting Game</title>
+    <title>Number Guessing Game</title>
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 50px;
+        }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas"></canvas>
-    <script src="game.js"></script>
+    <h1>Number Guessing Game</h1>
+    <p>Guess a number between 1 and 100:</p>
+    <input type="number" id="guessInput" min="1" max="100">
+    <button onclick="checkGuess()">Submit Guess</button>
+    <p id="message"></p>
+
+    <script>
+        // Generate a random number between 1 and 100
+        const secretNumber = Math.floor(Math.random() * 100) + 1;
+
+        function checkGuess() {
+            // Get the user's guess from the input
+            const userGuess = document.getElementById("guessInput").value;
+
+            // Check if the guess is correct, too low, or too high
+            if (userGuess == secretNumber) {
+                document.getElementById("message").innerHTML = "Congratulations! You guessed the correct number!";
+            } else if (userGuess < secretNumber) {
+                document.getElementById("message").innerHTML = "Too low. Try again!";
+            } else {
+                document.getElementById("message").innerHTML = "Too high. Try again!";
+            }
+        }
+    </script>
 </body>
 </html>
-const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
 
-// Player
-const player = {
-    x: canvas.width / 2,
-    y: canvas.height - 30,
-    width: 30,
-    height: 30,
-    color: 'blue',
-    speed: 5,
-};
-
-// Bullets
-const bullets = [];
-const bulletSpeed = 8;
-
-function drawPlayer() {
-    ctx.fillStyle = player.color;
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-}
-
-function drawBullets() {
-    ctx.fillStyle = 'red';
-    for (const bullet of bullets) {
-        ctx.fillRect(bullet.x, bullet.y, 5, 10);
-    }
-}
-
-function moveBullets() {
-    for (let i = bullets.length - 1; i >= 0; i--) {
-        bullets[i].y -= bulletSpeed;
-
-        // Remove bullets when they go off-screen
-        if (bullets[i].y < 0) {
-            bullets.splice(i, 1);
-        }
-    }
-}
-
-function shoot() {
-    bullets.push({
-        x: player.x + player.width / 2 - 2.5,
-        y: player.y,
-    });
-}
-
-function gameLoop() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawPlayer();
-    drawBullets();
-    moveBullets();
-
-    requestAnimationFrame(gameLoop);
-}
-
-// Controls
-document.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowLeft' && player.x > 0) {
-        player.x -= player.speed;
-    } else if (event.key === 'ArrowRight' && player.x < canvas.width - player.width) {
-        player.x += player.speed;
-    } else if (event.key === ' ' || event.key === 'Spacebar') {
-        shoot();
-    }
-});
-
-gameLoop();
 
 
 
